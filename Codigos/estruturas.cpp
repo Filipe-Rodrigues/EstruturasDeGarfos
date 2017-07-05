@@ -1,0 +1,345 @@
+#include "estruturas.hpp"
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////       Funções Auxiliares        ////////////////////////////
+
+
+string toString (int value) {
+	ostringstream ss;
+	ss << value;
+	return ss.str();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////    Implementação da Excessão    ////////////////////////////
+
+DataStructureException::DataStructureException (const char* message) {
+	this -> message = message;
+}
+
+const char* DataStructureException::what () {
+	return message;
+}
+
+IndexOutOfBoundsException::IndexOutOfBoundsException (const char* message) {
+	this -> message = message;
+}
+
+const char* IndexOutOfBoundsException::what () {
+	return message;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////      Implementação da Pilha     ////////////////////////////
+
+Stack::Node::Node (int data, Node* next) {
+	this -> data = data;
+	this -> next = next;
+}
+
+Stack::~Stack () {
+	empty();
+}
+
+void Stack::empty () {
+	while (top != NULL) {
+		Node* aux = top;
+		top = top -> next;
+		delete aux;
+	}
+	top = NULL;
+	stackSize = 0;
+}
+
+bool Stack::isEmpty () {
+	return stackSize == 0;
+}
+
+void Stack::push (int element) {
+	if (top == NULL) {
+		top = new Stack::Node (element, NULL);
+	} else {
+		Node* aux = top;
+		top = new Stack::Node (element, aux);
+	}
+	stackSize++;
+}
+
+int Stack::pop () {
+	if (top == NULL) {
+		throw DataStructureException ("A pilha está VAZIA! Não insista!");
+	}
+	int element = top -> data;
+	Node* aux = top;
+	top = top -> next;
+	delete aux;
+	stackSize--;
+	return element;
+}
+
+string Stack::roam () {
+	string result;
+	if (stackSize == 0) {
+		result = "Pilha vazia!";
+	} else {
+		Node* aux = top;
+		result = "TOPO";
+		while (aux != NULL) {
+			result += " |> " + toString(aux -> data);
+			aux = aux -> next;
+		}
+		result += " |> BASE";
+	}
+	return result;
+}
+
+Stack& Stack::operator << (const int& rhs) {
+	push(rhs);
+	return *this;
+}
+
+Stack& Stack::operator >> (int& rhs) {
+	rhs = pop();
+	return *this;
+}
+
+Stack& Stack::operator >> (string& rhs) {
+	rhs = roam();
+	return *this;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////      Implementação da Fila      ////////////////////////////
+
+Queue::~Queue () {
+	empty();
+}
+
+void Queue::empty () {
+	while (first != NULL) {
+		Node* aux = first;
+		first = first -> next;
+		delete aux;
+	}
+	first = NULL;
+	last = NULL;
+	queueSize = 0;
+}
+
+bool Queue::isEmpty () {
+	return queueSize == 0;
+}
+
+void Queue::enqueue (int element) {
+	if (first == NULL) {
+		first = new Node (element);
+		last = first;
+	} else {
+		Node* aux = new Node (element);
+		last -> next = aux;
+		last = last -> next; 
+	}
+	queueSize++;
+}
+
+int Queue::dequeue () {
+	if (first == NULL) {
+		throw DataStructureException ("A fila está VAZIA! Não insista!");
+	}
+	int element = first -> data;
+	Node* aux = first;
+	first = first -> next;
+	delete aux;
+	queueSize--;
+	return element;
+}
+
+string Queue::roam () {
+	string result;
+	if (queueSize == 0) {
+		result = "Fila vazia!";
+	} else {
+		Node* aux = first;
+		result = "PRIMEIRO";
+		while (aux != NULL) {
+			result += " <| " + toString(aux -> data);
+			aux = aux -> next;
+		}
+		result += " <| BASE";
+	}
+	return result;
+}
+
+Queue& Queue::operator << (const int& rhs) {
+	enqueue(rhs);
+	return *this;
+}
+
+Queue& Queue::operator >> (int& rhs) {
+	rhs = dequeue();
+	return *this;
+}
+
+Queue& Queue::operator >> (string& rhs) {
+	rhs = roam();
+	return *this;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////      Implementação da Lista     ////////////////////////////
+
+List::Node::Node (int data, Node* prev, Node* next) {
+	this -> data = data;
+	this -> prev = prev;
+	this -> next = next;
+}
+
+List::List (const List& obj) {
+	listSize = obj.listSize;
+	first = new Node(0, NULL, NULL);
+	last = new Node(0, NULL, NULL);
+	*first = *obj.first;
+	*last = *obj.last;
+}
+
+List::~List () {
+	empty();
+}
+
+void List::empty () {
+	while (first != NULL) {
+		Node* aux = first;
+		first = first -> next;
+		delete aux;
+	}
+	listSize = 0;
+}
+
+bool List::isEmpty () {
+	return listSize == 0;
+}
+
+string List::roam () {
+	string result;
+	if (listSize == 0) {
+		result = "Lista vazia!";
+	} else {
+		Node* aux = first;
+		result = "INÍCIO:: ";
+		while (aux -> next != NULL) {
+			result += toString(aux -> data) + " <-> ";
+			aux = aux -> next;
+		}
+		result += toString(aux -> data) + " ::FIM";
+	}
+	return result;
+}
+
+void List::insertFirst (int element) {
+	first = new Node(element, NULL, NULL);
+	last = first;
+}
+
+int List::size () {
+	return listSize;
+}
+
+void List::insertL (int element) {
+	if (isEmpty()) {
+		insertFirst(element);
+	} else {
+		Node* aux = new Node(element, NULL, first);
+		first = aux;
+		first -> next -> prev = first;
+	}
+	listSize++;
+}
+
+void List::insertR (int element) {
+	if (isEmpty()) {
+		insertFirst(element);
+	} else {
+		Node* aux = new Node(element, last, NULL);
+		last = aux;
+		last -> prev -> next = last;
+	}
+	listSize++;
+}
+
+void List::insertAtPosition (int element, int position) {
+	if (position == 0) {
+		insertL(element);
+	} else if (position == listSize) {
+		insertR(element);
+	} else if (position > 0 and position < listSize) {
+		Node* aux = first;
+		for (int i = 0; i < position - 1; i++) {
+			aux = aux -> next;
+		}
+		Node* newNode = new Node(element, aux, aux -> next);
+		aux -> next = newNode;
+		newNode -> next -> prev = newNode;
+		listSize++;
+	} else {
+		throw IndexOutOfBoundsException("Posição de inserção inválida!");
+	}
+}
+
+void List::remove (int position) {
+	pull(position);
+}
+
+int List::pull (int position) {
+	if (position == 0 and listSize > 0) {
+		Node* aux = first;
+		first = first -> next;
+		int value = aux -> data;
+		delete aux;
+		if (listSize == 1) {
+			last = NULL;
+		} else {
+			first -> prev = NULL;
+		}
+		listSize--;
+		return value;
+	} else if (position == listSize - 1 and listSize > 0) {
+		Node* aux = last;
+		last = last -> prev;
+		last -> next = NULL;
+		int value = aux -> data;
+		delete aux;
+		listSize--;
+		return value;
+	} else if (position > 0 and position < listSize) {
+		Node* aux = first;
+		for (int i = 0; i < position; i++) {
+			aux = aux -> next;
+		}
+		aux -> prev -> next = aux -> next;
+		aux -> next -> prev = aux -> prev;
+		int value = aux -> data;
+		delete aux;
+		listSize--;
+		return value;
+	} else {
+		throw IndexOutOfBoundsException("Posição de remoção inválida!");
+	}
+}
+
+int List::get (int position) {
+	if (position < 0 or position >= listSize) {
+		throw IndexOutOfBoundsException("Posição de acesso inválida!");
+	}
+	Node* aux = first;
+	for (int i = 0; i < position; i++) {
+		aux = aux -> next;
+	}
+	return aux -> data;
+}
+
+List& List::operator >> (string& rhs) {
+	rhs = roam();
+	return *this;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////

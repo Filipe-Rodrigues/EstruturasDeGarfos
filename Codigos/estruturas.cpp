@@ -3,11 +3,14 @@
 /////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////       Funções Auxiliares        ////////////////////////////
 
-
 string toString (int value) {
 	ostringstream ss;
 	ss << value;
 	return ss.str();
+}
+
+int modulo (int value) {
+	return ((value >= 0) ? (value) : (-value));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +30,77 @@ IndexOutOfBoundsException::IndexOutOfBoundsException (const char* message) {
 
 const char* IndexOutOfBoundsException::what () {
 	return message;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+////////////////////////    Implementações auxiliares    ////////////////////////////
+
+InformacoesDeAresta::InformacoesDeAresta (int verticeAlvo, int peso) {
+	this -> verticeAlvo = verticeAlvo;
+	this -> peso = peso;
+}
+
+InformacoesDeAresta::InformacoesDeAresta (const InformacoesDeAresta& obj) {
+	verticeAlvo = obj.verticeAlvo;
+	peso = obj.peso;
+}
+
+void InformacoesDeAresta::setVerticeAlvo (int verticeAlvo) {
+	this -> verticeAlvo = verticeAlvo;
+}
+
+void InformacoesDeAresta::setPeso (int peso) {
+	this -> peso = peso;
+}
+
+int InformacoesDeAresta::getVerticeAlvo () {
+	return verticeAlvo;
+}
+
+int InformacoesDeAresta::getPeso () {
+	return peso;
+}
+
+InformacoesDeAresta& InformacoesDeAresta::operator = (const InformacoesDeAresta& rhs) {
+	if (this != &rhs) {
+		verticeAlvo = rhs.verticeAlvo;
+		peso = rhs.peso;
+	}
+	return *this;
+}
+
+CelulaDeIncidencia::CelulaDeIncidencia (bool pesoPositivo, int peso) {
+	this -> pesoPositivo = pesoPositivo;
+	this -> peso = peso;
+}
+
+CelulaDeIncidencia::CelulaDeIncidencia (const CelulaDeIncidencia& obj) {
+	pesoPositivo = obj.pesoPositivo;
+	peso = obj.peso;
+}
+
+void CelulaDeIncidencia::setPesoPositivo (bool pesoPositivo) {
+	this -> pesoPositivo = pesoPositivo;
+}
+
+void CelulaDeIncidencia::setPeso (int peso) {
+	this -> peso = peso;
+}
+
+bool CelulaDeIncidencia::temPesoPositivo () {
+	return pesoPositivo;
+}
+
+int CelulaDeIncidencia::getPeso () {
+	return peso;
+}
+
+CelulaDeIncidencia& CelulaDeIncidencia::operator = (const CelulaDeIncidencia& rhs) {
+	if (this != &rhs) {
+		pesoPositivo = rhs.pesoPositivo;
+		peso = rhs.peso;
+	}
+	return *this;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +262,7 @@ Queue& Queue::operator >> (string& rhs) {
 /////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////      Implementação da Lista     ////////////////////////////
 
-List::Node::Node (int data, Node* prev, Node* next) {
+List::Node::Node (InformacoesDeAresta& data, Node* prev, Node* next) {
 	this -> data = data;
 	this -> prev = prev;
 	this -> next = next;
@@ -196,10 +270,20 @@ List::Node::Node (int data, Node* prev, Node* next) {
 
 List::List (const List& obj) {
 	listSize = obj.listSize;
-	first = new Node(0, NULL, NULL);
-	last = new Node(0, NULL, NULL);
-	*first = *obj.first;
-	*last = *obj.last;
+	if (listSize > 0) {
+		Node* auxOBJ = obj.first;
+		first = new Node(auxOBJ -> data, NULL, NULL);
+		Node* auxTHIS = first;
+		while (auxOBJ -> next != NULL) {
+			auxOBJ = auxOBJ -> next;
+			auxTHIS -> next = new Node (auxOBJ -> data, auxTHIS, NULL);
+			auxTHIS = auxTHIS -> next;
+		}
+		last = auxTHIS;
+	} else {
+		first = NULL;
+		last = NULL;
+	}
 }
 
 List::~List () {
@@ -227,15 +311,17 @@ string List::roam () {
 		Node* aux = first;
 		result = "INÍCIO:: ";
 		while (aux -> next != NULL) {
-			result += toString(aux -> data) + " <-> ";
+			result += "Dest. " + toString(aux -> data.getVerticeAlvo()) 
+			+ ", Peso " + toString(aux -> data.getPeso()) + " <-> ";
 			aux = aux -> next;
 		}
-		result += toString(aux -> data) + " ::FIM";
+		result += "Dest. " + toString(aux -> data.getVerticeAlvo()) 
+		+ ", Peso " + toString(aux -> data.getPeso()) + " ::FIM";
 	}
 	return result;
 }
 
-void List::insertFirst (int element) {
+void List::insertFirst (InformacoesDeAresta element) {
 	first = new Node(element, NULL, NULL);
 	last = first;
 }
@@ -244,7 +330,7 @@ int List::size () {
 	return listSize;
 }
 
-void List::insertL (int element) {
+void List::insertL (InformacoesDeAresta element) {
 	if (isEmpty()) {
 		insertFirst(element);
 	} else {
@@ -255,7 +341,7 @@ void List::insertL (int element) {
 	listSize++;
 }
 
-void List::insertR (int element) {
+void List::insertR (InformacoesDeAresta element) {
 	if (isEmpty()) {
 		insertFirst(element);
 	} else {
@@ -266,7 +352,7 @@ void List::insertR (int element) {
 	listSize++;
 }
 
-void List::insertAtPosition (int element, int position) {
+void List::insertAtPosition (InformacoesDeAresta element, int position) {
 	if (position == 0) {
 		insertL(element);
 	} else if (position == listSize) {
@@ -289,11 +375,36 @@ void List::remove (int position) {
 	pull(position);
 }
 
-int List::pull (int position) {
+bool List::exists (int dataValue) {
+	Node* aux = first;
+	while (aux != NULL and aux -> data.getVerticeAlvo() != dataValue) {
+		aux = aux -> next;
+	}
+	if (aux != NULL) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+InformacoesDeAresta List::search (int dataValue) {
+	Node* aux = first;
+	while (aux != NULL and aux -> data.getVerticeAlvo() != dataValue) {
+		aux = aux -> next;
+	}
+	if (aux != NULL) {
+		return aux -> data;
+	} else {
+		InformacoesDeAresta notFound;
+		return notFound;
+	}
+}
+
+InformacoesDeAresta List::pull (int position) {
 	if (position == 0 and listSize > 0) {
 		Node* aux = first;
 		first = first -> next;
-		int value = aux -> data;
+		InformacoesDeAresta value = aux -> data;
 		delete aux;
 		if (listSize == 1) {
 			last = NULL;
@@ -306,7 +417,7 @@ int List::pull (int position) {
 		Node* aux = last;
 		last = last -> prev;
 		last -> next = NULL;
-		int value = aux -> data;
+		InformacoesDeAresta value = aux -> data;
 		delete aux;
 		listSize--;
 		return value;
@@ -317,7 +428,7 @@ int List::pull (int position) {
 		}
 		aux -> prev -> next = aux -> next;
 		aux -> next -> prev = aux -> prev;
-		int value = aux -> data;
+		InformacoesDeAresta value = aux -> data;
 		delete aux;
 		listSize--;
 		return value;
@@ -326,7 +437,7 @@ int List::pull (int position) {
 	}
 }
 
-int List::get (int position) {
+InformacoesDeAresta List::get (int position) {
 	if (position < 0 or position >= listSize) {
 		throw IndexOutOfBoundsException("Posição de acesso inválida!");
 	}
@@ -339,6 +450,29 @@ int List::get (int position) {
 
 List& List::operator >> (string& rhs) {
 	rhs = roam();
+	return *this;
+}
+
+List& List::operator = (const List& rhs) {
+	cout << "ENTROU NO OPERADOR DE ATRIBUICAO jajajajajajajajajajaja" << endl;
+	if (this != &rhs) {
+		listSize = rhs.listSize;
+		if (listSize > 0) {
+			Node* auxOBJ = rhs.first;
+			first = new Node(auxOBJ -> data, NULL, NULL);
+			Node* auxTHIS = first;
+			while (auxOBJ -> next != NULL) {
+				auxOBJ = auxOBJ -> next;
+				auxTHIS -> next = new Node (auxOBJ -> data, auxTHIS, NULL);
+				auxTHIS = auxTHIS -> next;
+			}
+			last = auxTHIS;
+		} else {
+			first = NULL;
+			last = NULL;
+		}
+	}
+	cout << "SAIU DO OPERADOR DE ATRIBUICAO jajajajajajajajajajaja" << endl;
 	return *this;
 }
 

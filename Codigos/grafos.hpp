@@ -17,13 +17,13 @@ class VertexNotFoundException : public std::exception {
 
 };
 
-class MatrixSizeException : public std::exception {
+class DataStructureSizingException : public std::exception {
 	
 	private:
 		const char* message;
 
 	public:
-		MatrixSizeException(const char* message);
+		DataStructureSizingException(const char* message);
 		virtual const char* what ();
 
 };
@@ -49,9 +49,9 @@ class Grafo {
 	public:
 		Grafo (bool orientado);
 		~Grafo() {}
-		virtual void reiniciar () = 0;
 		int getQuantVertices () {return quantVertices;}
 		int getQuantArestas () {return quantArestas;}
+		virtual void reiniciar () = 0;
 		virtual List getVizinhos (int vertice) = 0;
 		virtual bool isVizinho (int vertice1, int vertice2) = 0;
 		virtual void adicionarVertices (int quantidade) = 0;
@@ -64,11 +64,47 @@ class MatrizDeAdjacencia : public Grafo{
 
 	private:
 		int** matriz;
-		void expandMatix (int amount);
+		void expandMatrix (int amount);
 		void clearMatrix ();
 	public:
 		MatrizDeAdjacencia (bool orientado);
 		~MatrizDeAdjacencia();
+		void reiniciar ();
+		List getVizinhos (int vertice);
+		bool isVizinho (int vertice1, int vertice2);
+		void adicionarVertices (int quantidade);
+		void adicionarAresta (int vertice1, int vertice2, int peso);
+		string getRepresentacao ();
+
+};
+
+class ListaDeAdjacencia : public Grafo{
+
+	private:
+		List** listas;
+		void expandList (int amount);
+		void clearList ();
+	public:
+		ListaDeAdjacencia (bool orientado);
+		~ListaDeAdjacencia();
+		void reiniciar ();
+		List getVizinhos (int vertice);
+		bool isVizinho (int vertice1, int vertice2);
+		void adicionarVertices (int quantidade);
+		void adicionarAresta (int vertice1, int vertice2, int peso);
+		string getRepresentacao ();
+
+};
+
+class MatrizDeIncidencia : public Grafo{
+
+	private:
+		CelulaDeIncidencia** matriz;
+		void expandMatrix (int amountL, int amountC);
+		void clearMatrix ();
+	public:
+		MatrizDeIncidencia (bool orientado);
+		~MatrizDeIncidencia();
 		void reiniciar ();
 		List getVizinhos (int vertice);
 		bool isVizinho (int vertice1, int vertice2);

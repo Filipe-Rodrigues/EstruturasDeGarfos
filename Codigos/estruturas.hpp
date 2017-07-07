@@ -32,6 +32,36 @@ class IndexOutOfBoundsException : public std::exception {
 
 };
 
+class InformacoesDeAresta {
+	private:
+		int verticeAlvo;
+		int peso;
+	public:
+		InformacoesDeAresta () {verticeAlvo = -1; peso = 0;}
+		InformacoesDeAresta (int verticeAlvo, int peso);
+		InformacoesDeAresta (const InformacoesDeAresta& obj);
+		void setVerticeAlvo (int verticeAlvo);
+		void setPeso (int peso);
+		int getVerticeAlvo ();
+		int getPeso ();
+		InformacoesDeAresta& operator = (const InformacoesDeAresta& rhs);
+};
+
+class CelulaDeIncidencia {
+	private:
+		bool pesoPositivo;
+		int peso;
+	public:
+		CelulaDeIncidencia () {pesoPositivo = true; peso = 0;}
+		CelulaDeIncidencia (bool pesoPositivo, int peso);
+		CelulaDeIncidencia (const CelulaDeIncidencia& obj);
+		void setPesoPositivo (bool pesoPositivo);
+		void setPeso (int peso);
+		bool temPesoPositivo ();
+		int getPeso ();
+		CelulaDeIncidencia& operator = (const CelulaDeIncidencia& rhs);
+};
+
 class Stack {
 
 	private:
@@ -77,7 +107,6 @@ class Queue {
 		Node* last;
 		int queueSize;
 
-		void empty ();
 		void enqueue (int element);
 		int dequeue ();
 		string roam ();
@@ -85,6 +114,7 @@ class Queue {
 	public:
 		Queue () {first = NULL; last = NULL; queueSize = 0;}
 		~Queue();
+		void empty ();
 		int size ();
 		bool isEmpty ();
 		int peek ();
@@ -100,33 +130,36 @@ class List {
 		class Node {
 			friend class List;
 			private:
-				int data;
+				InformacoesDeAresta data;
 				Node* next;
 				Node* prev;
 			public:
-				Node (int data, Node* next, Node* prev);
+				Node (InformacoesDeAresta& data, Node* prev, Node* next);
 		};
 		Node* first;
 		Node* last;
 		int listSize;
 
-		void empty ();
-		void insertFirst (int element);
+		void insertFirst (InformacoesDeAresta element);
 		string roam ();
 
 	public:
 		List () {first = NULL; last = NULL; listSize = 0;}
 		List (const List& obj);
 		~List();
+		void empty ();
 		int size ();
 		bool isEmpty ();
-		void insertL (int element);
-		void insertR (int element);
-		void insertAtPosition (int element, int position);
+		void insertL (InformacoesDeAresta element);
+		void insertR (InformacoesDeAresta element);
+		void insertAtPosition (InformacoesDeAresta element, int position);
 		void remove (int position);
-		int pull (int position);
-		int get (int position);
+		bool exists (int dataValue);
+		InformacoesDeAresta search (int dataValue);
+		InformacoesDeAresta pull (int position);
+		InformacoesDeAresta get (int position);
 		List& operator >> (string& rhs);
+		List& operator = (const List& rhs);
 
 };
 

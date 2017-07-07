@@ -61,6 +61,7 @@ void testQueue () {
 	}
 }
 
+/*
 void testList () {
 	List l1;
 	int n;
@@ -88,9 +89,30 @@ void testList () {
 		cin >> x;
 	}
 }
+*/
 
 void testGarfos () {
-	Grafo* g1 = new MatrizDeAdjacencia (true);
+	int numOp;
+	cout << "Orientado ou não? (0 - Nope, 1- Yep) ";
+	cin >> numOp;
+	bool orientado = (numOp == 0) ? (false) : (true);
+	Grafo* g1;
+	cout << "1 - Matriz de Adjacencia" << endl;
+	cout << "2 - Lista de Adjacencia" << endl;
+	cout << "1 - Matriz de Incidencia" << endl;
+	cout << "" << endl << "Qual vai ser? ";
+	cin >> numOp;
+	switch (numOp) {
+		case 2:
+			g1 = new ListaDeAdjacencia (orientado);
+			break;
+		case 3:
+			g1 = new MatrizDeIncidencia (orientado);
+			break;
+		default:
+			g1 = new MatrizDeAdjacencia (orientado);
+			break;
+	}
 	cout << (g1 -> getRepresentacao()) << endl;
 	int q, n;
 	cout << "Quantos vértices? ";
@@ -109,6 +131,7 @@ void testGarfos () {
 		cin >> q; 
 	} while (q != 0);
 	cout << (g1 -> getRepresentacao()) << endl;
+	g1 -> adicionarVertices(2);
 	g1 -> adicionarVertices(2);
 	cout << (g1 -> getRepresentacao()) << endl;
 	cout << "Quer a lista de vizinhos de quem? ";

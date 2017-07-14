@@ -61,10 +61,10 @@ void testQueue () {
 	}
 }
 
-/*
-void testList () {
+
+/*void testList () {
 	List l1;
-	int n;
+	InformacoesDeAresta n;
 	string res;
 	l1 >> res;
 	cout << res << endl;
@@ -99,7 +99,7 @@ void testGarfos () {
 	Grafo* g1;
 	cout << "1 - Matriz de Adjacencia" << endl;
 	cout << "2 - Lista de Adjacencia" << endl;
-	cout << "1 - Matriz de Incidencia" << endl;
+	cout << "3 - Matriz de Incidencia" << endl;
 	cout << "" << endl << "Qual vai ser? ";
 	cin >> numOp;
 	switch (numOp) {

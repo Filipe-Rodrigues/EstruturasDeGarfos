@@ -68,6 +68,7 @@ class Stack {
 		class Node {
 			friend class Stack;
 			private:
+				int anterior;
 				int data;
 				Node* next;
 			public:
@@ -98,6 +99,7 @@ class Queue {
 		class Node {
 			friend class Queue;
 			private:
+				int anterior;
 				int data;
 				Node* next;
 			public:
@@ -130,6 +132,7 @@ class List {
 		class Node {
 			friend class List;
 			private:
+				int anterior;
 				InformacoesDeAresta data;
 				Node* next;
 				Node* prev;

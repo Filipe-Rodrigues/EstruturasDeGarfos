@@ -454,7 +454,6 @@ List& List::operator >> (string& rhs) {
 }
 
 List& List::operator = (const List& rhs) {
-	cout << "ENTROU NO OPERADOR DE ATRIBUICAO jajajajajajajajajajaja" << endl;
 	if (this != &rhs) {
 		listSize = rhs.listSize;
 		if (listSize > 0) {
@@ -472,7 +471,6 @@ List& List::operator = (const List& rhs) {
 			last = NULL;
 		}
 	}
-	cout << "SAIU DO OPERADOR DE ATRIBUICAO jajajajajajajajajajaja" << endl;
 	return *this;
 }
 

@@ -4,16 +4,30 @@ using namespace std;
 
 class DFSdata{
 public:
-	int visitado;
+	bool visitado;
 	int low;
 	int num;
 	int anterior;
 	bool marcado;
 	
 	DFSdata(){
-		visitado = -1;
+		visitado = false;
 		anterior = -1;
 		marcado = false;
+		low = -1;
+		num = -1;
 	}
 };
 
+class MinimumData{
+public:
+	int d;
+	int anterior;
+	char cor;
+	
+	MinimumData(){
+		d = 1000000000;
+		anterior = -1;
+		cor = 'B';
+	}
+};

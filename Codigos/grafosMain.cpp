@@ -6,64 +6,58 @@
 using namespace std;
 
 void findBridges(Grafo* grafo, int v, int tam, int &cnt, int &bcnt, DFSdata *vertices) {
-    int i;
 
-    vertices[v].visitado = cnt++; // marca como visitado
-    vertices[v].low = vertices[v].visitado;
-    //low2[v] = num[v] = cnt2++;
-    for(i = 0; i < tam; i++){  // percorre as arestas do vertice
-        if (grafo->isVizinho(v, i)){
-			if (vertices[i].visitado == -1){
-				vertices[i].anterior = v;
-				findBridges(grafo, i, tam, cnt, bcnt, vertices); // visita o vértice
-				if (vertices[v].low > vertices[i].low) vertices[v].low = vertices[i].low;
-				if (vertices[i].low == vertices[i].visitado){
-					bcnt++;
-					cout << "ponte " << v << " - " << i << "\n";
-				}
-				/*if(low2[i]>=num[v]){
-					cout << "Ponto de articulacao - " << v << "\n";
-				}
-				low2[v]=(low2[v]<low2[i])?low2[v]:low2[i];*/
-			}
-			else if (i!=vertices[v].anterior){
-				//low2[v] = (low2[v]<num[i])?low2[v]:num[i];
-				if(vertices[v].low > vertices[i].visitado){
-					vertices[v].low = vertices[i].visitado;
-				}
+    vertices[v].visitado = true; // marca como visitado
+    vertices[v].low = vertices[v].num = cnt++;
+    
+    List vizinhos = grafo -> getVizinhos(v);
+	for(int j = 0; j < vizinhos.size(); j++){  
+		int i = vizinhos.get(j).getVerticeAlvo();
+		if (!vertices[i].visitado){
+			vertices[i].anterior = v;
+			findBridges(grafo, i, tam, cnt, bcnt, vertices); // visita o vértice
+			if (vertices[v].low > vertices[i].low) vertices[v].low = vertices[i].low;
+			if (vertices[i].low == vertices[i].num){
+				bcnt++;
+				//cout << "ponte " << v << " - " << i << "\n";
 			}
 		}
-    }
+		else if (i!=vertices[v].anterior and vertices[v].low > vertices[i].num){
+			vertices[v].low = vertices[i].num;
+			
+		}
+	}
 }
 
-void cutVertices(Grafo* grafo, int v, int tam, int cnt, DFSdata *vertices) {
-    int i;
 
-    vertices[v].visitado = cnt; // marca como visitado
-    vertices[v].low = vertices[v].num = cnt++;
-    //low2[v] = num[v] = cnt2++;
-    for(i = 0; i < tam; i++){  // percorre as arestas do vertice
-        if (grafo->isVizinho(v, i)){
-			if (vertices[i].visitado == -1){
-				vertices[i].anterior = v;
-				cutVertices(grafo, i, tam, cnt, vertices); // visita o vértice
-				if (vertices[v].low > vertices[i].low) vertices[v].low = vertices[i].low;
-				/*if (vertices[i].low == vertices[i].visitado){
-					bcnt++;
-					cout << "ponte " << v << " - " << i << "\n";
-				}*/
-				if(vertices[i].low > vertices[v].num){
-					//cout << "Ponto de articulacao - " << v << "\n";
-					vertices[i].marcado = true;
-				}
-				vertices[v].low = (vertices[v].low < vertices[i].low) ? vertices[v].low : vertices[i].low;
+void cutVertices(Grafo* grafo, int u, int tam, DFSdata *vertices) {
+	
+	static int cnt = 0;
+	int filhos = 0;
+	
+    vertices[u].visitado = true; // marca como visitado
+    vertices[u].low = vertices[u].num = ++cnt;
+    List vizinhos = grafo -> getVizinhos(u);
+
+    for(int i = 0; i < vizinhos.size(); i++){  // percorre as arestas do vertice
+		int v = vizinhos.get(i).getVerticeAlvo();
+		if (!vertices[v].visitado){
+			filhos++;
+			vertices[v].anterior = u;
+			cutVertices(grafo, v, tam, vertices); // visita o vértice
+			vertices[u].low = min(vertices[u].low, vertices[v].low);
+			
+			if((vertices[u].anterior == -1) && (filhos > 1)){
+				vertices[u].marcado = true;
 			}
-			else if (i!=vertices[v].anterior){
-				vertices[v].low = (vertices[v].low < vertices[i].num) ? vertices[v].low : vertices[i].num;
-				/*if(vertices[v].low > vertices[i].visitado){
-					vertices[v].low = vertices[i].visitado;
-				}*/
+			if((vertices[u].anterior != -1) && (vertices[v].low >= vertices[u].num)){
+				//cout << "Ponto de articulacao - " << v << "\n";
+				vertices[u].marcado = true;
 			}
+		}
+		else if (v!=vertices[u].anterior){
+			vertices[u].low = min(vertices[u].low, vertices[v].num);
+			
 		}
     }
 
@@ -74,7 +68,7 @@ int verificaPonte(Grafo* grafo, int tam){
 	int cnt = 0, bcnt = 0;
 	
 	for(int i=0; i<tam; i++){
-		if(vertices[i].visitado == -1){
+		if(vertices[i].visitado == false){
 			findBridges(grafo, i, tam, cnt, bcnt, vertices);
 		}
 	}
@@ -82,34 +76,90 @@ int verificaPonte(Grafo* grafo, int tam){
 	return bcnt;
 }
 
-void verificaPontoDeArticulacao(Grafo* grafo, int tam) {
+int verificaPontoDeArticulacao(Grafo* grafo, int tam) {
 	DFSdata *vertices = new DFSdata[tam];
-	int cnt = 0;
-	for(int i=0; i<tam; i++){
-		if(vertices[i].visitado == -1){
-			cutVertices(grafo, i, tam, cnt, vertices);
-		}
-		for (int j = 0; j < tam; j++) {
-			vertices[j].visitado = -1;
-			vertices[j].num = -1;
-			vertices[j].low = -1;
-			vertices[j].anterior = -1;
+	int numArticulacoes = 0;
+	
+	for(int i=0; i < tam; i++){
+		if(vertices[i].visitado == false){
+			cutVertices(grafo, i, tam, vertices);
 		}
 	}
+	
 	for (int j = 0; j < tam; j++) {
 		if (vertices[j].marcado) {
-			cout << "Ponto de articulacao - " << j << "\n";
+			//cout << "Ponto de articulacao - " << j << "\n";
+			numArticulacoes++;
 		}
 	}
 	delete[] vertices;
-	
+	return numArticulacoes;
 }
 
+int buscarVertices(Grafo* grafo, int u, DFSdata* vertices, int &cnt){
+	
+    vertices[u].visitado = true; // marca como visitado
+    vertices[u].low = vertices[u].num = ++cnt;
+    List vizinhos = grafo -> getVizinhos(u);
+
+    for(int i = 0; i < vizinhos.size(); i++){  // percorre as arestas do vertice
+		int v = vizinhos.get(i).getVerticeAlvo();
+		if (!vertices[v].visitado){
+			vertices[v].anterior = u;
+			buscarVertices(grafo, v, vertices, cnt); // visita o vértice
+		}
+    }
+    
+	return cnt;
+}
+
+int verticesAlcancaveis (Grafo* grafo, int v, int tam) {
+	int cnt = -1;
+	DFSdata *vertices = new DFSdata[tam];
+	int alcancaveis = buscarVertices(grafo, v, vertices, cnt);
+	return alcancaveis;
+	delete []vertices;
+}
+
+int calcularDiametro(Grafo* grafo, int tam){
+	MinimumData* vertices;
+	Queue fila;
+	int v, u, distancia = 0, maiorDistancia = 0;
+	
+	for(int i=0; i<tam; i++){
+		vertices  = new MinimumData[tam];
+		vertices[i].d = 0;
+		vertices[i].cor = 'C';
+		fila << i;
+		
+		while(fila . size() != 0){
+			//distancia++;
+			fila >> v;	
+			List vizinhos = grafo -> getVizinhos(v);
+			for(int j = 0; j < vizinhos.size(); j++) { 
+				u = vizinhos.get(j).getVerticeAlvo();
+				if (vertices[u].cor != 'C'){
+					vertices[u].d = vertices[v].d + 1;
+					vertices[u].cor = 'C';
+					vertices[u].anterior = v;
+					fila << u;
+				} 
+				if(vertices[u].d > distancia) distancia = vertices[u].d;
+			}
+		}
+		
+		if (distancia > maiorDistancia) maiorDistancia = distancia;
+		
+		delete []vertices;
+	}
+	return	maiorDistancia;
+} 
+
 int main() {
-	int numOp;
+	int orient, numOp;
 	cout << "Seu grafo é orientado? (0 - Não, 1 - sim): ";
-	cin >> numOp;
-	bool orientado = (numOp == 1)? (true) : (false);
+	cin >> orient;
+	bool orientado = (orient == 1)? (true) : (false);
 	
 	cout << "Como deseja representar seu grafo: \n";
 	cout << "1 - Matriz de Adjacencia \n";
@@ -149,26 +199,12 @@ int main() {
 	}while(arq.good());
 	
 	arq.close();
-	verificaPontoDeArticulacao(grafo, tam);
-	//cout << "Numero de pontes " << verificaPonte(grafo, tam) << "\n";
+	if(orient == 0){
+		cout << "Numero de Articulações : " << verificaPontoDeArticulacao(grafo, tam) << "\n";
+		cout << "Numero de pontes : " << verificaPonte(grafo, tam) << "\n";
+	}
+	cout << "Vertices Alcanceveis do 0 : " << verticesAlcancaveis(grafo, 0, tam) << "\n";
+	cout << "Vertices Alcanceveis do 1 : " << verticesAlcancaveis(grafo, 1, tam) << "\n";
+	cout << "Diametro : " << calcularDiametro(grafo, tam) << "\n";
 	return 0;
 }
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

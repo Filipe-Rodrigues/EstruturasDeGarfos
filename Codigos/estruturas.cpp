@@ -204,6 +204,14 @@ bool Queue::isEmpty () {
 	return queueSize == 0;
 }
 
+int Queue::peek () {
+	return first -> data;
+}
+
+int Queue::size(){
+	return queueSize;
+}
+
 void Queue::enqueue (int element) {
 	if (first == NULL) {
 		first = new Node (element);

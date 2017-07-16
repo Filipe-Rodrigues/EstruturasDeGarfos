@@ -9,6 +9,7 @@ public:
 	int num;
 	int anterior;
 	bool marcado;
+	int label;
 	
 	DFSdata(){
 		visitado = false;
@@ -16,6 +17,7 @@ public:
 		marcado = false;
 		low = -1;
 		num = -1;
+		label = -1;
 	}
 };
 

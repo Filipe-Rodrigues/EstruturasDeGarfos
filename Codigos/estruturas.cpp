@@ -9,8 +9,44 @@ string toString (int value) {
 	return ss.str();
 }
 
+string toString (double value) {
+	ostringstream ss;
+	ss << value;
+	return ss.str();
+}
+
 int modulo (int value) {
 	return ((value >= 0) ? (value) : (-value));
+}
+
+string obterTempo (double tempo) {
+	int d, h, m, s, ms, us;
+	d = h = m = s = ms = 0;
+	us = tempo;
+	if (us > 1000) {
+		ms = us/1000;
+		us %= 1000;
+		if (ms > 1000) {
+			s = ms/1000;
+			ms %= 1000;
+			if (s > 60) {
+				m = s/60;
+				s %= 60;
+				if (m > 60) {
+					h = m/60;
+					m %= 60;
+					if (h > 24) {
+						d = h/24;
+						h %= 24;
+					}
+				}
+			}
+		}
+	}
+	string tempoFormatado = toString(d) + "d " + toString(h) + "h " +
+		toString(m) + "m " + toString(s) + "s " + toString(ms) + "ms " + 
+		toString(us) + "μs";
+	return tempoFormatado;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
